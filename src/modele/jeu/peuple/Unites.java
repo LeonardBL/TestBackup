@@ -72,12 +72,32 @@ public abstract class Unites {
         return nbUnit;
     }
 
+    public void setNbUnit(int nb){
+        nbUnit = nb;
+    }
+
     public int calculAttaqueTotale(){
-        return getForceAttaque() + (nbUnit-1) * 3;
+        int force = getForceAttaque(); // Force de base de l'unité
+        System.out.println("Force : " + force);
+        force += (nbUnit-1) * 3; // Bonus en fonction du nombre d'unités sur la case
+        System.out.println("Bonus : " + force);
+        if(c.getBiome() == getTypePeuple().getTerrainFavori()){ // Bonus en fonction de la case sur laquelle se trouve l'unité
+            force = (int) ((double) force * 1.5);
+            System.out.println("Terrain : " + force);
+        }
+        return force;
     }
 
     public int calculDefenseTotale(){
-        return getForceAttaque() + (nbUnit-1) * 3;
+        int def = getForceAttaque(); // Defense de base de l'unité
+        System.out.println("Def : " + def);
+        def += (nbUnit-1) * 3; // Bonus en fonction du nombre d'unités sur la case
+        System.out.println("Bonus : " + def);
+        if(c.getBiome() == getTypePeuple().getTerrainFavori()){ // Bonus en fonction de la case sur laquelle se trouve l'unité
+            def = (int) ((double) def * 1.5);
+            System.out.println("Terrain : " + def);
+        }
+        return def;
     }
 
     // Méthodes abstraites pour les capacités spéciales de chaque peuple

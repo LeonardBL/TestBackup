@@ -157,6 +157,7 @@ public class VueControleur extends JFrame implements Observer {
                                 
                                 if (!unite.aJoueCeTour()) {
                                     casesAttaquables = plateau.getCasesAttaquables(caseClic1, jeu.getJoueurCourant());
+                                    combatPreview.attaqueUnite = caseClic1.getUnites().calculAttaqueTotale();
                                 } else {
                                     casesAttaquables = null;
                                 }
@@ -177,6 +178,7 @@ public class VueControleur extends JFrame implements Observer {
                                 caseClic2 = null;
                                 casesAccessibles = null;
                                 casesAttaquables = null;
+                                combatPreview.attaqueUnite = 0;
                                 mettreAJourAffichage();
                                 return;
                             }
@@ -185,13 +187,16 @@ public class VueControleur extends JFrame implements Observer {
                             boolean coupValide = false;
                             if (casesAccessibles != null && casesAccessibles.contains(caseClic2)) {
                                 coupValide = true;
+                                combatPreview.attaqueUnite = caseClic1.getUnites().calculAttaqueTotale();
                             } else if (casesAttaquables != null && casesAttaquables.contains(caseClic2)) {
                                 coupValide = true;
+                                combatPreview.attaqueUnite = caseClic1.getUnites().calculAttaqueTotale();
                             }
                             
                             if (coupValide) {
                                 Coup coup = new Coup(caseClic1, caseClic2);
                                 jeu.envoyerCoup(coup);
+                                combatPreview.attaqueUnite = 0;
                                 
                                 // Attendre un peu pour voir le résultat avant d'afficher le dialogue
                                 try {
@@ -204,7 +209,6 @@ public class VueControleur extends JFrame implements Observer {
                             caseClic2 = null;
                             casesAccessibles = null;
                             casesAttaquables = null;
-                            combatPreview.attaqueUnite = 0;
                             mettreAJourAffichage();
                         }
 
@@ -214,30 +218,23 @@ public class VueControleur extends JFrame implements Observer {
                 iP.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseEntered(MouseEvent e) {
-                        //super.mouseEntered(e);
-                        //System.out.println("testenter");
                         Case caseSurvolee = plateau.getCases()[xx][yy];
                         if(caseClic1 != null && caseSurvolee.getUnites() != null && caseSurvolee.getUnites().getProprietaire() != caseClic1.getUnites().getProprietaire()){
                                 combatPreview.defenseUnite = caseSurvolee.getUnites().calculDefenseTotale();
-                                System.out.println(combatPreview.attaqueUnite + " et " + combatPreview.defenseUnite);
-                                combatPreview.calculatePercents(); // PAS MVC
+                                System.out.println(combatPreview.attaqueUnite + " contre " + combatPreview.defenseUnite);
+                                combatPreview.calculatePercents(caseClic1,caseSurvolee);
+                                mettreAJourAffichage();
                         }
                     }
 
                     @Override
                     public void mouseExited(MouseEvent e) {
-                        //super.mouseExited(e);
-                        //System.out.println("testsortie");
                         combatPreview.defenseUnite = 0;
-                        combatPreview.hidePercents(); // PAS MVC
+                        mettreAJourAffichage();
                     }
 
 
                 });
-
-
-
-
 
 
 
@@ -275,6 +272,13 @@ public class VueControleur extends JFrame implements Observer {
         
         labelTour.setText("Tour: " + jeu.getTourActuel() + "/" + jeu.getNbToursMax());
         labelTour.setFont(new Font("Arial", Font.BOLD, 14));
+
+        // Affichage prédiction combat
+        if(combatPreview.defenseUnite != 0){ // S'affiche uniquement si 2 unités sont renseignées dans le champ
+            combatPreview.showPercents();
+        }else{
+            combatPreview.hidePercents();
+        }
 
         for (int x = 0; x < sizeX; x++) {
             for (int y = 0; y < sizeY; y++) {
@@ -378,10 +382,10 @@ public class VueControleur extends JFrame implements Observer {
         System.out.println("      RÉSULTAT DU COMBAT");
         System.out.println("═══════════════════════════════════");
         System.out.println("⚔️  ATTAQUANT: " + attaquantNom + " (" + attaquantJoueur + ")");
-        System.out.println("    Force d'attaque: " + resultat.forceAttaquant);
+        System.out.println("    Force d'attaque: " + resultat.forceAttaquant + resultat.descriptionTerrainDefenseur);
         System.out.println();
         System.out.println("🛡️  DÉFENSEUR: " + defenseurNom + " (" + defenseurJoueur + ")");
-        System.out.println("    Force de défense: " + resultat.forceDefenseur + resultat.descriptionTerrain);
+        System.out.println("    Force de défense: " + resultat.forceDefenseur + resultat.descriptionTerrainDefenseur);
         System.out.println();
         System.out.println("    Proba de gagner pour l'attaque: " + (double) resultat.forceAttaquant / (resultat.forceAttaquant + resultat.forceDefenseur));
         System.out.println();
