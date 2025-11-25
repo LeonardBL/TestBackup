@@ -101,6 +101,9 @@ public class VueControleur extends JFrame implements Observer {
         btnPasserTour = new JButton("Passer le tour");
         
         btnPasserTour.addActionListener(e -> {
+            if(jeu.hasEnded()){
+                return;
+            }
             jeu.passerAuJoueurSuivant();
             caseClic1 = null;
             caseClic2 = null;
@@ -117,10 +120,9 @@ public class VueControleur extends JFrame implements Observer {
 
         combatPreview = new CombatPreview(); // Element qui permet de determiles les probas avant le combat
 
-        combatPreview.panel = new JPanel(new FlowLayout());
         add(combatPreview.panel, BorderLayout.SOUTH);
         
-        setSize(sizeX * pxCase, sizeY * pxCase + 100);
+        setSize(sizeX * pxCase, sizeY * pxCase + 120);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // permet de terminer l'application à la fermeture de la fenêtre
 
         grilleIP = new JPanel(new GridLayout(sizeY, sizeX)); // grilleJLabels va contenir les cases graphiques et les positionner sous la forme d'une grille
@@ -140,6 +142,11 @@ public class VueControleur extends JFrame implements Observer {
                 iP.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
+                        // Aucune action si le jeu est terminé
+                        if(jeu.hasEnded()){
+                            return;
+                        }
+
                         // Logique de jeu
                         if (caseClic1 == null) {
                             // Premier clic : sélectionner une unité

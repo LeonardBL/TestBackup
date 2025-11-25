@@ -357,6 +357,8 @@ public class Plateau extends Observable {
         Biome biomeDefenseur = caseDefenseur.getBiome();
         if (biomeDefenseur == defenseur.getTypePeuple().getTerrainFavori()) {
             descriptionTerrain2 = " (Bonus Terrain +50%)";
+        } else if (biomeDefenseur == defenseur.getTypePeuple().getTerrainDeteste()) {
+            descriptionTerrain2 = " (Bonus Terrain -33%)";
         }
 
         // Bonus de terrain pour l'attaquant
@@ -364,6 +366,8 @@ public class Plateau extends Observable {
         Biome biomeAttaquant = caseAttaquant.getBiome();
         if (biomeAttaquant == attaquant.getTypePeuple().getTerrainFavori()) {
             descriptionTerrain1 = " (Bonus Terrain +50%)";
+        } else if (biomeAttaquant == attaquant.getTypePeuple().getTerrainDeteste()) {
+            descriptionTerrain1 = " (Bonus Terrain -33%)";
         }
 
 
@@ -373,7 +377,8 @@ public class Plateau extends Observable {
         int forceTotal = forceAtt + forceDef;
         double probaGagne = (float) forceAtt / forceTotal; // Probabilite que l'attaquand gagne en pourcentage/100
         double probaRand = rand.nextDouble(); // Nombre aleatoire qui determine le resultat
-        boolean attaquantGagne = probaGagne > probaRand; // Resultat
+        System.out.println("Proba choisie aléatoirement : " + probaRand);
+        boolean attaquantGagne = probaGagne > probaRand; // Resultat aléatoire
 
         // Créer le résultat avant de modifier le plateau
         modele.jeu.ResultatCombat resultat = new modele.jeu.ResultatCombat(
