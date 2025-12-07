@@ -393,7 +393,7 @@ public class VueControleur extends JFrame implements Observer {
                         Case caseSurvolee = plateau.getCases()[xx][yy];
                         if(caseClic1 != null && caseSurvolee.getUnites() != null && caseSurvolee.getUnites().getProprietaire() != caseClic1.getUnites().getProprietaire()){
                                 combatPreview.defenseUnite = caseSurvolee.getUnites().calculDefenseTotale();
-                                System.out.println(combatPreview.attaqueUnite + " contre " + combatPreview.defenseUnite);
+                                //System.out.println(combatPreview.attaqueUnite + " contre " + combatPreview.defenseUnite);
                                 combatPreview.calculerPourcentages(caseClic1,caseSurvolee);
                                 mettreAJourAffichage();
                         }
