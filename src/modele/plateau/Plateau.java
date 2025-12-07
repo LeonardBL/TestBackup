@@ -63,9 +63,9 @@ public class Plateau extends Observable {
 
     public void addJoueur(Joueur [] j) {
 
-        for (int jo = 0; jo < 4; jo++){ // Boucle sur les joueurs
+        for (int jo = 0; jo < j.length; jo++){ // Boucle sur les joueurs
 
-            if(j[jo] == null){ // Si moins de 4 joueurs
+            if(j[jo] == null){ // Si moins de joueurs
                 continue;
             }
 
@@ -138,23 +138,39 @@ public class Plateau extends Observable {
     }
 
     public void arriverCase(Case c, Unites u) {
-
         c.u = u;
-
     }
 
     public void deplacerUnite(Case c1, Case c2) {
         if (c1.u != null) {
 
             c1.u.allerSurCase(c2);
-
         }
-
-
-
         setChanged();
         notifyObservers();
+    }
 
+    // forcer un notif pour le snapshot
+    public void refresh(){
+        setChanged();
+        notifyObservers();
+    }
+
+    /**
+     * Calcule la distance réelle entre deux points.
+     * Les déplacements en diagonale coûtent plus cher racine carre de 2
+     * Un déplacement en ligne droite coûte 1, en diagonale ça coute plus
+     */
+    private double calculerDistance(int dx, int dy) {
+        int absDx = Math.abs(dx);
+        int absDy = Math.abs(dy);
+        
+        // Distance avec diagonales plus coûteuses
+        // Chaque pas diagonal compte comme √2, chaque pas droit compte comme 1
+        int diagonales = Math.min(absDx, absDy);
+        int lignesDroites = Math.abs(absDx - absDy);
+        
+        return diagonales * Math.sqrt(2) + lignesDroites;
     }
 
     /**
@@ -182,10 +198,15 @@ public class Plateau extends Observable {
         Point posDepart = map.get(caseDepart);
         int portee = unite.getPorteeDeplacement();
         
-        // Parcourir toutes les cases dans la portée de déplacement
+        // Parcourir toutes les cases potentiellement dans la portée de déplacement
+        // On élargit la zone de recherche pour couvrir les diagonales possibles
         for (int dx = -portee; dx <= portee; dx++) {
             for (int dy = -portee; dy <= portee; dy++) {
                 if (dx == 0 && dy == 0) continue; // Pas la case de départ
+                
+                // Vérifier que la distance réelle est dans la portée
+                double distance = calculerDistance(dx, dy);
+                if (distance > portee) continue; // Trop loin en diagonale
                 
                 int newX = posDepart.x + dx;
                 int newY = posDepart.y + dy;
@@ -206,7 +227,7 @@ public class Plateau extends Observable {
 
     /**
      * Calcule les cases attaquables depuis une case donnée
-     */
+    */
     public List<Case> getCasesAttaquables(Case caseDepart, Joueur joueur) {
         List<Case> casesAttaquables = new ArrayList<>();
         
@@ -229,10 +250,15 @@ public class Plateau extends Observable {
         Point posDepart = map.get(caseDepart);
         int portee = unite.getPorteeAttaque();
         
-        // Parcourir toutes les cases dans la portée d'attaque
+        // Parcourir toutes les cases potentiellement dans la portée d'attaque
         for (int dx = -portee; dx <= portee; dx++) {
             for (int dy = -portee; dy <= portee; dy++) {
                 if (dx == 0 && dy == 0) continue; // Pas la case de départ
+                
+                // Vérifier que la distance réelle est dans la portée
+                // Les diagonales coûtent plus cher (√2 ≈ 1.41)
+                double distance = calculerDistance(dx, dy);
+                if (distance > portee) continue; // Trop loin en diagonale
                 
                 int newX = posDepart.x + dx;
                 int newY = posDepart.y + dy;
@@ -249,6 +275,57 @@ public class Plateau extends Observable {
         }
         
         return casesAttaquables;
+    }
+
+    /**
+     * Calcule les cases accessibles pour un allie
+     */
+    public List<Case> getCasesAlliees(Case caseDepart, Joueur joueur) {
+        List<Case> casesAlliees = new ArrayList<>();
+
+        if (caseDepart == null || caseDepart.getUnites() == null) {
+            return casesAlliees;
+        }
+
+        Unites unite = caseDepart.getUnites();
+
+        // Vérifier que l'unité appartient au joueur
+        if (unite.getProprietaire() != joueur) {
+            return casesAlliees;
+        }
+
+        // Si l'unité a déjà déplacé ou attaqué, elle ne peut plus bouger
+        if (unite.aDeplaceOuAttaque()) {
+            return casesAlliees;
+        }
+
+        Point posDepart = map.get(caseDepart);
+        int portee = unite.getPorteeDeplacement();
+
+        // Parcourir toutes les cases dans la portée de déplacement
+        for (int dx = -portee; dx <= portee; dx++) {
+            for (int dy = -portee; dy <= portee; dy++) {
+                if (dx == 0 && dy == 0) continue; // Pas la case de départ
+
+                // Vérifier que la distance réelle est dans la portée
+                double distance = calculerDistance(dx, dy);
+                if (distance > portee) continue; // Trop loin en diagonale
+
+                int newX = posDepart.x + dx;
+                int newY = posDepart.y + dy;
+
+                if (contenuDansGrille(new Point(newX, newY))) {
+                    Case c = grilleCases[newX][newY];
+
+                    // Une case est accessible pour l'allie si elle ou contient une unité alliee
+                    if (c.getUnites() != null && c.getUnites().getProprietaire() == joueur) {
+                        casesAlliees.add(c);
+                    }
+                }
+            }
+        }
+
+        return casesAlliees;
     }
 
     /**
