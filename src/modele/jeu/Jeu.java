@@ -80,7 +80,7 @@ public class Jeu extends Thread{
     }
 
     // Variante avec chargement depuis un fichier
-    public Jeu(int nombreJoueurs, TypePeuple[] peuplesChoisis, boolean[] joueursIA, List<String> data, boolean nbJoueursSupADeux) {
+    public Jeu(int nombreJoueurs, TypePeuple[] peuplesChoisis, boolean[] joueursIA, List<String> data) {
         this.nbJoueurs = nombreJoueurs;
         this.joueursIA = joueursIA != null ? joueursIA : new boolean[nombreJoueurs];
         joueurs = new Joueur[nombreJoueurs];
@@ -91,6 +91,8 @@ public class Jeu extends Thread{
         }
 
         indexJoueurCourant = Integer.parseInt(data.get(3));
+        nbToursMax = Integer.parseInt(data.get(2));
+        tourActuel = Integer.parseInt(data.get(1));
 
         // Taille du plateau selon le nombre de joueurs
         if (nbJoueurs > 2) {
@@ -128,40 +130,40 @@ public class Jeu extends Thread{
                     int nb = Integer.parseInt(data.get(readLine));
                     switch (joueurs[joueur].getPeuple()){
                         case HUMAIN:
-                            System.out.println("Humain" + readLine);
+                            //System.out.println("Humain" + readLine);
                             Humain h = new Humain(plateau,Integer.parseInt(data.get(readLine+1)));
                             joueurs[joueur].ajouterUnite(h);
                             h.setProprietaire(joueurs[joueur]);
                             h.setJoueCeTour(Boolean.parseBoolean(data.get(readLine+2))); // Infos de l'unité
                             h.setDepalceOuAttaque(Boolean.parseBoolean(data.get(readLine+3)));
-                            plateau.setUniteSurCase(h,nb%7,nb/7); // Le mettre sur la bonne case
+                            plateau.setUniteSurCase(h,nb/7,nb%7); // Le mettre sur la bonne case
                             break;
                         case GOBELIN:
-                            System.out.println("Gob" + readLine);
+                            //System.out.println("Gob" + readLine);
                             Gobelin g = new Gobelin(plateau,Integer.parseInt(data.get(readLine+1)));
                             joueurs[joueur].ajouterUnite(g);
                             g.setProprietaire(joueurs[joueur]);
                             g.setJoueCeTour(Boolean.parseBoolean(data.get(readLine+2)));
                             g.setDepalceOuAttaque(Boolean.parseBoolean(data.get(readLine+3)));
-                            plateau.setUniteSurCase(g,nb%7,nb/7);
+                            plateau.setUniteSurCase(g,nb/7,nb%7);
                             break;
                         case NAIN:
-                            System.out.println("Nain" + readLine);
+                            //System.out.println("Nain" + readLine);
                             Nain n = new Nain(plateau,Integer.parseInt(data.get(readLine+1)));
                             joueurs[joueur].ajouterUnite(n);
                             n.setProprietaire(joueurs[joueur]);
                             n.setJoueCeTour(Boolean.parseBoolean(data.get(readLine+2)));
                             n.setDepalceOuAttaque(Boolean.parseBoolean(data.get(readLine+3)));
-                            plateau.setUniteSurCase(n,nb%7,nb/7);
+                            plateau.setUniteSurCase(n,nb/7,nb%7);
                             break;
                         case ELFE:
-                            System.out.println("Elfe" + readLine);
+                            //System.out.println("Elfe" + readLine);
                             Elfe e = new Elfe(plateau,Integer.parseInt(data.get(readLine+1)));
                             joueurs[joueur].ajouterUnite(e);
                             e.setProprietaire(joueurs[joueur]);
                             e.setJoueCeTour(Boolean.parseBoolean(data.get(readLine+2)));
                             e.setDepalceOuAttaque(Boolean.parseBoolean(data.get(readLine+3)));
-                            plateau.setUniteSurCase(e,nb%7,nb/7);
+                            plateau.setUniteSurCase(e,nb/7,nb%7);
                             break;
                     }
                     if(readLine+1 < data.size() && !data.get(readLine+1).contains("joueur")){ // Lire la prochaine unité
@@ -172,47 +174,47 @@ public class Jeu extends Thread{
                 }
                 readLine++;
             }
-        } else {
+        } else { // Cas ou 2 joueurs
             int readLine = 52;
             for(int joueur = 0; joueur < 2; joueur++){
                 while(readLine < data.size() && !data.get(readLine).contains("joueur")){ // Tant que le joueur a des unites
                     int nb = Integer.parseInt(data.get(readLine));
                     switch (joueurs[joueur].getPeuple()){
                         case HUMAIN:
-                            System.out.println("Humain" + readLine);
+                            //System.out.println("Humain" + readLine);
                             Humain h = new Humain(plateau,Integer.parseInt(data.get(readLine+1)));
                             joueurs[joueur].ajouterUnite(h);
                             h.setProprietaire(joueurs[joueur]);
                             h.setJoueCeTour(Boolean.parseBoolean(data.get(readLine+2))); // Infos de l'unité
                             h.setDepalceOuAttaque(Boolean.parseBoolean(data.get(readLine+3)));
-                            plateau.setUniteSurCase(h,nb%6,nb/6); // Le mettre sur la bonne case
+                            plateau.setUniteSurCase(h,nb/6,nb%6); // Le mettre sur la bonne case
                             break;
                         case GOBELIN:
-                            System.out.println("Gob" + readLine);
+                            //System.out.println("Gob" + readLine);
                             Gobelin g = new Gobelin(plateau,Integer.parseInt(data.get(readLine+1)));
                             joueurs[joueur].ajouterUnite(g);
                             g.setProprietaire(joueurs[joueur]);
                             g.setJoueCeTour(Boolean.parseBoolean(data.get(readLine+2)));
                             g.setDepalceOuAttaque(Boolean.parseBoolean(data.get(readLine+3)));
-                            plateau.setUniteSurCase(g,nb%6,nb/6);
+                            plateau.setUniteSurCase(g,nb/6,nb%6);
                             break;
                         case NAIN:
-                            System.out.println("Nain" + readLine);
+                            //System.out.println("Nain" + readLine);
                             Nain n = new Nain(plateau,Integer.parseInt(data.get(readLine+1)));
                             joueurs[joueur].ajouterUnite(n);
                             n.setProprietaire(joueurs[joueur]);
                             n.setJoueCeTour(Boolean.parseBoolean(data.get(readLine+2)));
                             n.setDepalceOuAttaque(Boolean.parseBoolean(data.get(readLine+3)));
-                            plateau.setUniteSurCase(n,nb%6,nb/6);
+                            plateau.setUniteSurCase(n,nb/6,nb%6);
                             break;
                         case ELFE:
-                            System.out.println("Elfe" + readLine);
+                            //System.out.println("Elfe" + readLine);
                             Elfe e = new Elfe(plateau,Integer.parseInt(data.get(readLine+1)));
                             joueurs[joueur].ajouterUnite(e);
                             e.setProprietaire(joueurs[joueur]);
                             e.setJoueCeTour(Boolean.parseBoolean(data.get(readLine+2)));
                             e.setDepalceOuAttaque(Boolean.parseBoolean(data.get(readLine+3)));
-                            plateau.setUniteSurCase(e,nb%6,nb/6);
+                            plateau.setUniteSurCase(e,nb/6,nb%6);
                             break;
                     }
                     if(readLine+1 < data.size() && !data.get(readLine+1).contains("joueur")){ // Lire la prochaine unité

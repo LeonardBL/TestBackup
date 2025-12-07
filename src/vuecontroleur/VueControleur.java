@@ -251,7 +251,7 @@ public class VueControleur extends JFrame implements Observer {
                 };
                 joueursIA[i] = Boolean.parseBoolean(data.get(8 + i*4));
             }
-            jeu = new Jeu(4,peuplesChoisis,joueursIA,data,true);
+            jeu = new Jeu(4,peuplesChoisis,joueursIA,data);
 
             plateau = jeu.getPlateau();
             sizeX = Plateau.SIZE_X;
@@ -285,7 +285,7 @@ public class VueControleur extends JFrame implements Observer {
                 };
                 joueursIA[i] = Boolean.parseBoolean(data.get(8 + i*4));
             }
-            jeu = new Jeu(2,peuplesChoisis,joueursIA,data,false);
+            jeu = new Jeu(2,peuplesChoisis,joueursIA,data);
 
             plateau = jeu.getPlateau();
             sizeX = Plateau.SIZE_X;
