@@ -2,6 +2,8 @@ package vuecontroleur;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
@@ -133,7 +135,7 @@ public class VueControleur extends JFrame implements Observer {
 
         // Bouton de chargement de partie
         JButton btnCharger = creerBoutonMenu("Charger la dernière partie");
-        btn4.addActionListener(e -> lancerPartieRapide(4));
+        btnCharger.addActionListener(e -> chargerPartie());
         contenu.add(btnCharger); // Changer
 
         contenu.add(Box.createVerticalStrut(20));
@@ -210,6 +212,101 @@ public class VueControleur extends JFrame implements Observer {
         
         setSize(sizeX * pxCase, sizeY * pxCase + 120);
         setLocationRelativeTo(null);
+    }
+
+    private void chargerPartie(){
+        //Lecture du fichier de jeu si possible
+
+        File sauvegarde = new File("Partie.txt");
+        List<String> data = new ArrayList<>();
+        if (sauvegarde.exists()) {           // Try to create the file
+            System.out.println("Chargement de la sauvegarde : " + sauvegarde.getName());
+        } else {
+            System.out.println("Sauvegarde n'existe pas, créez en une au préalable");
+            return;
+        }
+        try (Scanner sauvReader = new Scanner(sauvegarde)) {
+            while (sauvReader.hasNextLine()) {
+                String fileData = sauvReader.nextLine();
+                data.add(fileData);
+                System.out.println(fileData);
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+        System.out.println(data);
+
+        // Recréation de la partie
+        if(data.get(14).contains("Joueur")){ // En cas de 4 joueurs
+            TypePeuple[] peuplesChoisis = new TypePeuple[4];
+            boolean[] joueursIA = new boolean[4];
+            for(int i = 0; i < 4; i++){
+                switch (data.get(6 + i*5)) {
+                    case "Humain" -> peuplesChoisis[i] = TypePeuple.HUMAIN;
+                    case "Nain" -> peuplesChoisis[i] = TypePeuple.NAIN;
+                    case "Elfe" -> peuplesChoisis[i] = TypePeuple.ELFE;
+                    case "Gobelin" -> peuplesChoisis[i] = TypePeuple.GOBELIN;
+                    default -> throw new IllegalStateException("Unexpected value");
+                };
+                joueursIA[i] = Boolean.parseBoolean(data.get(8 + i*4));
+            }
+            jeu = new Jeu(4,peuplesChoisis,joueursIA,data,true);
+
+            plateau = jeu.getPlateau();
+            sizeX = Plateau.SIZE_X;
+            sizeY = Plateau.SIZE_Y;
+
+            chargerLesIcones();
+
+            JPanel ecranJeu = creerEcranJeuOriginal();
+            mainContainer.add(ecranJeu, "JEU");
+            cardLayout.show(mainContainer, "JEU");
+
+            plateau.addObserver(this);
+            mettreAJourAffichage();
+
+            // Si le premier joueur est une IA, la faire jouer immédiatement
+            jouerTourIA();
+
+            setSize(sizeX * pxCase, sizeY * pxCase + 120);
+            setLocationRelativeTo(null);
+
+        }else{
+            TypePeuple[] peuplesChoisis = new TypePeuple[2];
+            boolean[] joueursIA = new boolean[2];
+            for(int i = 0; i < 2; i++){
+                switch (data.get(6 + i*5)) {
+                    case "Humain" -> peuplesChoisis[i] = TypePeuple.HUMAIN;
+                    case "Nain" -> peuplesChoisis[i] = TypePeuple.NAIN;
+                    case "Elfe" -> peuplesChoisis[i] = TypePeuple.ELFE;
+                    case "Gobelin" -> peuplesChoisis[i] = TypePeuple.GOBELIN;
+                    default -> throw new IllegalStateException("Unexpected value");
+                };
+                joueursIA[i] = Boolean.parseBoolean(data.get(8 + i*4));
+            }
+            jeu = new Jeu(2,peuplesChoisis,joueursIA,data,false);
+
+            plateau = jeu.getPlateau();
+            sizeX = Plateau.SIZE_X;
+            sizeY = Plateau.SIZE_Y;
+
+            chargerLesIcones();
+
+            JPanel ecranJeu = creerEcranJeuOriginal();
+            mainContainer.add(ecranJeu, "JEU");
+            cardLayout.show(mainContainer, "JEU");
+
+            plateau.addObserver(this);
+            mettreAJourAffichage();
+
+            // Si le premier joueur est une IA, la faire jouer immédiatement
+            jouerTourIA();
+
+            setSize(sizeX * pxCase, sizeY * pxCase + 120);
+            setLocationRelativeTo(null);
+        }
+
     }
     
     // jeu
@@ -792,4 +889,5 @@ public class VueControleur extends JFrame implements Observer {
     private void sauvegarderJeu() throws IOException {
         jeu.enregistrerPartie();
     }
+
 }

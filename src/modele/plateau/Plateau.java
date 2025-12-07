@@ -61,6 +61,10 @@ public class Plateau extends Observable {
 
     }
 
+    public void setUniteSurCase(Unites unit, int x, int y){
+        unit.allerSurCase(grilleCases[x][y]);
+    }
+
     public void addJoueur(Joueur [] j) {
 
         for (int jo = 0; jo < j.length; jo++){ // Boucle sur les joueurs
@@ -135,6 +139,16 @@ public class Plateau extends Observable {
             yy = yy - 2 + new Random().nextInt(5);
         }
         return new int[]{xx,yy};
+    }
+
+    public void changeBiomeFromPos(String st, int x, int y){
+        switch (st){
+            case "FORET" -> grilleCases[x][y].setBiome(Biome.FORET);
+            case "DESERT" -> grilleCases[x][y].setBiome(Biome.DESERT);
+            case "PLAINE" -> grilleCases[x][y].setBiome(Biome.PLAINE);
+            case "MONTAGNE" -> grilleCases[x][y].setBiome(Biome.MONTAGNE);
+            default -> throw new IllegalStateException("Unexpected value");
+        }
     }
 
     public void arriverCase(Case c, Unites u) {
