@@ -2,6 +2,7 @@ package vuecontroleur;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
@@ -50,7 +51,7 @@ public class VueControleur extends JFrame implements Observer {
     private JLabel labelJoueurCourant, labelTour;
     private JLabel labelTerrainFavori;
     private JButton btnPasserTour;
-    private JButton btnCoupPrev, btnCoupNext;
+    private JButton btnCoupPrev, btnCoupNext, btnSauvegarde;
     private boolean reviewMode = false;
     private int reviewIndex = -1;
     private boolean finAnnoncee = false;
@@ -129,6 +130,13 @@ public class VueControleur extends JFrame implements Observer {
         contenu.add(btn4);
         
         contenu.add(Box.createVerticalStrut(40));
+
+        // Bouton de chargement de partie
+        JButton btnCharger = creerBoutonMenu("Charger la dernière partie");
+        btn4.addActionListener(e -> lancerPartieRapide(4));
+        contenu.add(btnCharger); // Changer
+
+        contenu.add(Box.createVerticalStrut(20));
         
         // Info
         JLabel info = new JLabel("Les peuples sont attribués aléatoirement");
@@ -252,6 +260,17 @@ public class VueControleur extends JFrame implements Observer {
         btnCoupNext.setPreferredSize(new Dimension(40, 30));
         btnCoupNext.setEnabled(false);
         btnCoupNext.addActionListener(e -> montrerCoup(1));
+
+        btnSauvegarde = creerBoutonRetroJeu("Sauv");
+        btnSauvegarde.setPreferredSize(new Dimension(40, 30));
+        btnSauvegarde.setEnabled(true);
+        btnSauvegarde.addActionListener(e -> {
+            try {
+                sauvegarderJeu();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }); // Changer
         
         btnPasserTour = creerBoutonRetroJeu("[ FIN TOUR ]");
         // Fin de tour automatique : un coup par tour
@@ -261,6 +280,7 @@ public class VueControleur extends JFrame implements Observer {
         panelDroite.add(btnCoupPrev);
         panelDroite.add(btnCoupNext);
         panelDroite.add(btnPasserTour);
+        panelDroite.add(btnSauvegarde);
         
         JPanel panelGauche = new JPanel();
         panelGauche.setLayout(new BoxLayout(panelGauche, BoxLayout.Y_AXIS));
@@ -766,5 +786,10 @@ public class VueControleur extends JFrame implements Observer {
             case "Vert": return new Color(60, 130, 60);
             default: return RETRO_TEXT;
         }
+    }
+
+    // Enregistre la partie dans un fichier
+    private void sauvegarderJeu() throws IOException {
+        jeu.enregistrerPartie();
     }
 }

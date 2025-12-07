@@ -5,6 +5,9 @@ import modele.plateau.Case;
 import modele.plateau.Plateau;
 
 import java.awt.Point;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 import java.util.ArrayList;
@@ -81,7 +84,6 @@ public class Jeu extends Thread{
         this(4, new TypePeuple[]{TypePeuple.ELFE, TypePeuple.NAIN, TypePeuple.HUMAIN, TypePeuple.GOBELIN});
     }
 
-    // Faire mieux après mais au moins ça existe
     protected void initUnitesJoueurs(Joueur [] j){
 
         Random rand = new Random();
@@ -487,6 +489,53 @@ public class Jeu extends Thread{
             this.joueurCouleur = couleur;
             this.peuple = peuple;
         }
+    }
+
+    // Enregistrement de la partie dans un fichier
+    public void enregistrerPartie() throws IOException {
+        File sauvegarde = new File("Partie.txt");
+        if (sauvegarde.createNewFile()) {           // Try to create the file
+            System.out.println("Création de la sauvegarde : " + sauvegarde.getName());
+        } else {
+            System.out.println("Sauvegarde existe, remplacement de la sauvegarde");
+            sauvegarde.delete();
+            sauvegarde.createNewFile();
+        }
+        FileWriter sauvegardeWriter = new FileWriter("Partie.txt", true); // Writer en mode append pour la partie
+        sauvegardeWriter.write("Partie :" + "\n"); // Enregistrement de la partie
+
+        sauvegardeWriter.write(tourActuel + "\n"); // Tour actuel
+        sauvegardeWriter.write(nbToursMax + "\n"); // Tour max
+        sauvegardeWriter.write(indexJoueurCourant + "\n"); // Joueur courant
+
+        // Enregistrement de chaque joueur
+        for(int idJoueur = 0; idJoueur < joueurs.length; idJoueur++){
+            sauvegardeWriter.write("Joueur " + idJoueur + "\n"); // Nb
+            sauvegardeWriter.write(joueurs[idJoueur].getScore() + "\n"); // Score
+            sauvegardeWriter.write(joueurs[idJoueur].getPeuple().getNom() + "\n"); // PeupleJoue
+            sauvegardeWriter.write(joueurs[idJoueur].getCouleur() + "\n"); // Couleur
+        }
+
+        // Enregistrement des biomes du plateau
+        sauvegardeWriter.write("Plateau :" + "\n");
+        for(int x = 0; x < Plateau.SIZE_X; x++){
+            for(int y = 0; y < Plateau.SIZE_Y; y++){
+                sauvegardeWriter.write(plateau.getPosition(x,y).getBiome().toString() + "\n"); // Enregistrement de chaque case
+            }
+        }
+
+        // Enregistrement des unites de chaque joueur
+        for(int idJoueur = 0; idJoueur < joueurs.length; idJoueur++){
+            sauvegardeWriter.write("Unités joueur " + idJoueur + "\n"); // Enregistrement de chaque case
+            for(int idUnite = 0; idUnite < joueurs[idJoueur].getUnites().size(); idUnite++){ // Parcours des unités
+                sauvegardeWriter.write(joueurs[idJoueur].getUnite(idUnite).getCase().getId() + "\n"); // Id de la case
+                sauvegardeWriter.write(joueurs[idJoueur].getUnite(idUnite).getNbUnit() + "\n"); // Nb d'unités sur la case
+                sauvegardeWriter.write(joueurs[idJoueur].getUnite(idUnite).getJoueCeTour() + "\n"); // Si l'unité a joué
+                sauvegardeWriter.write(joueurs[idJoueur].getUnite(idUnite).getDepalceOuAttaque() + "\n"); // Si l'unité peut attaquer
+            }
+        }
+
+        sauvegardeWriter.close();
     }
 
 }

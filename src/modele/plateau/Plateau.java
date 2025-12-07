@@ -43,7 +43,7 @@ public class Plateau extends Observable {
 
         for (int x = 0; x < SIZE_X; x++) {
             for (int y = 0; y < SIZE_Y; y++) {
-                grilleCases[x][y] = new Case(this,randomBiome());
+                grilleCases[x][y] = new Case(this,randomBiome(),y + x*SIZE_X);
                 map.put(grilleCases[x][y], new Point(x, y));
             }
 
@@ -410,6 +410,10 @@ public class Plateau extends Observable {
 
     public Point getPosition(Case c) {
         return map.get(c);
+    }
+
+    public Case getPosition(int x, int y) {
+        return grilleCases[x][y];
     }
 
 
